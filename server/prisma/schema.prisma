@@ -1,0 +1,218 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  workerId        String?  @unique // e.g., HBK-1001
+  role            String   @default("WORKER") // ADMIN or WORKER
+  name            String?
+  phone           String   @unique
+  whatsappNumber  String?
+  email           String?  @unique
+  passwordHash    String
+  
+  // Location
+  address         String?
+  villageOrTown   String?
+  city            String?
+  district        String?  @default("Jhunjhunu")
+  state           String?  @default("Rajasthan")
+  pincode         String?
+  
+  // Professional
+  categoryId      String?  @db.ObjectId
+  category        JobCategory? @relation(fields: [categoryId], references: [id])
+  skills          String?  // comma-separated or text
+  experience      String?  // years of experience
+  bio             String?  // Professional description
+  availability    String?  @default("AVAILABLE") // AVAILABLE, BUSY, UNAVAILABLE
+  
+  // Profile settings & flags
+  profilePhoto    String?
+  portfolioLinks  String?  // JSON string or links
+  language        String   @default("hi")
+  isVerified      Boolean  @default(false)
+  verificationNote String?
+  status          String   @default("ACTIVE") // ACTIVE, SUSPENDED, INACTIVE
+  suspendedReason String?
+  
+  // Privacy & Consent
+  isPublicProfile Boolean  @default(true)
+  showPhonePublic Boolean  @default(true)
+  showWhatsappPublic Boolean @default(true)
+  whatsappOptIn   Boolean  @default(true)
+  termsAccepted   Boolean  @default(true)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  createdJobs     Job[]    @relation("JobCreator")
+  applications    JobApplication[]
+  assignments     JobAssignment[]
+  notifications   Notification[]
+  reviewsReceived Review[] @relation("WorkerReviews")
+  reviewsGiven    Review[] @relation("AuthorReviews")
+  auditLogs       AdminAuditLog[]
+}
+
+model JobCategory {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  nameHi          String
+  nameEn          String
+  descriptionHi   String?
+  descriptionEn   String?
+  status          String   @default("ACTIVE")
+  
+  createdAt       DateTime @default(now())
+
+  users           User[]
+  jobs            Job[]
+}
+
+model Job {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  
+  titleHi         String
+  titleEn         String
+  descriptionHi   String
+  descriptionEn   String
+  
+  categoryId      String   @db.ObjectId
+  category        JobCategory @relation(fields: [categoryId], references: [id])
+  
+  address         String
+  area            String?
+  city            String   @default("Jhunjhunu")
+  district        String   @default("Jhunjhunu")
+  state           String   @default("Rajasthan")
+  pincode         String?
+  
+  jobDate         String?
+  startTime       String?
+  duration        String?
+  deadline        String?
+  employmentType  String?  @default("Daily Wage") // Daily Wage, Contract, Full-time, Part-time
+  
+  payment         String   // e.g., ₹600 - ₹800 / day
+  workersRequired Int      @default(1)
+  
+  requiredSkills  String?
+  requiredExp     String?
+  employerName    String?
+  employerContact String?
+  
+  status          String   @default("PUBLISHED") // DRAFT, PUBLISHED, CLOSED, ARCHIVED
+  
+  createdBy       String   @db.ObjectId
+  creator         User     @relation("JobCreator", fields: [createdBy], references: [id])
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  applications    JobApplication[]
+  assignments     JobAssignment[]
+  notifications   Notification[]
+}
+
+model JobApplication {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  jobId             String   @db.ObjectId
+  job               Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  userId            String   @db.ObjectId
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  status            String   @default("Applied") // Applied, Under Review, Shortlisted, Selected, Rejected, Withdrawn
+  adminNotes        String?
+  workerSnapshot    String?  // JSON snapshot of applicant profile at time of applying
+  
+  statusHistory     ApplicationStatusHistory[]
+  
+  appliedAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([jobId, userId])
+}
+
+model ApplicationStatusHistory {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  applicationId     String   @db.ObjectId
+  application       JobApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  status            String
+  changedBy         String   // ADMIN or WORKER
+  comment           String?
+  createdAt         DateTime @default(now())
+}
+
+model JobAssignment {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  jobId             String   @db.ObjectId
+  job               Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  userId            String   @db.ObjectId
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  assignedBy        String
+  assignedAt        DateTime @default(now())
+  status            String   @default("ASSIGNED")
+}
+
+model Review {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  workerId        String   @db.ObjectId
+  worker          User     @relation("WorkerReviews", fields: [workerId], references: [id], onDelete: Cascade)
+  authorId        String   @db.ObjectId
+  author          User     @relation("AuthorReviews", fields: [authorId], references: [id], onDelete: Cascade)
+  
+  rating          Int      // 1 to 5
+  comment         String
+  isVerifiedJob   Boolean  @default(true)
+  isModerated     Boolean  @default(true) // approved or pending
+  
+  createdAt       DateTime @default(now())
+}
+
+model Notification {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String   @db.ObjectId
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId           String?  @db.ObjectId
+  job             Job?     @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  
+  type            String   @default("WHATSAPP") // WHATSAPP, SMS, WEB
+  recipientPhone  String?
+  templateName    String?
+  message         String
+  status          String   @default("PENDING") // PENDING, SENT, FAILED, MOCK_SENT, SANDBOX_MOCK
+  providerMessageId String?
+  failureReason   String?
+  retryCount      Int      @default(0)
+  
+  createdAt       DateTime @default(now())
+  sentAt          DateTime?
+}
+
+model OtpRecord {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  phone           String
+  otpCode         String
+  attempts        Int      @default(0)
+  expiresAt       DateTime
+  verified        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+}
+
+model AdminAuditLog {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  adminId         String   @db.ObjectId
+  admin           User     @relation(fields: [adminId], references: [id])
+  action          String   // e.g. VERIFY_WORKER, SUSPEND_WORKER, PUBLISH_JOB, UPDATE_APP_STATUS
+  targetType      String   // User, Job, Application, Review
+  targetId        String
+  details         String?  // JSON string or notes
+  createdAt       DateTime @default(now())
+}
