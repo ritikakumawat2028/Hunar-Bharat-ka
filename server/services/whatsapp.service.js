@@ -49,8 +49,8 @@ async function sendWhatsAppJobAlert({ jobId, jobTitle, location, skills, categor
     status: 'ACTIVE',
     whatsappOptIn: true,
     OR: [
-      { whatsappNumber: { not: null } },
-      { phone: { not: null } }
+      { whatsappNumber: { not: '' } },
+      { phone: { not: '' } }
     ]
   };
 

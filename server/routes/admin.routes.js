@@ -395,6 +395,11 @@ router.post('/jobs', async (req, res) => {
       jobDate,
       startTime,
       duration,
+      deadline,
+      employmentType,
+      status = 'PUBLISHED'
+    } = req.body;
+
     // Server-side Validation: Cannot create jobs with past job date or past deadline
     const todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
     const today = new Date(todayStr);
