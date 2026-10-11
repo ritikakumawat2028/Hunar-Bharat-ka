@@ -3,9 +3,7 @@ node_modules/
 */node_modules/
 
 # Production builds
-dist/
-*/dist/
-build/
+# client/dist is committed for zero-configuration host deployment on Render
 
 # Environment and sensitive secrets (CRITICAL)
 .env
