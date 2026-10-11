@@ -43,6 +43,22 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', service: 'HUNAR BHARAT KA API', timestamp: new Date().toISOString() });
 });
 
+// Serve frontend in production (Render single-service deployment)
+const clientBuildPath = path.join(__dirname, '../client/dist');
+app.use(express.static(clientBuildPath));
+
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+    return next();
+  }
+  res.sendFile(path.join(clientBuildPath, 'index.html'), (err) => {
+    if (err) {
+      // If client not built yet, fallback to status
+      res.status(200).send('HUNAR BHARAT KA API is running. Build frontend with: npm run build in client directory.');
+    }
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`HUNAR BHARAT KA Server running on port ${PORT}`);
