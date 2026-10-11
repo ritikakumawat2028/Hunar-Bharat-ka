@@ -16,6 +16,7 @@ import {
   Briefcase
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import WhatsAppSolidIcon from '../WhatsAppIcon';
 
 const AdminWorkers = () => {
   const [workers, setWorkers] = useState([]);
@@ -351,7 +352,22 @@ const AdminWorkers = () => {
                   </td>
 
                   <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                    <div style={{ display: 'inline-flex', gap: '6px' }}>
+                    <div style={{ display: 'inline-flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                      {/* WhatsApp Direct Contact Button */}
+                      {(w.whatsappNumber || w.phone) && (
+                        <a
+                          href={`https://wa.me/91${(w.whatsappNumber || w.phone).replace(/\D/g, '')}?text=${encodeURIComponent(`नमस्ते ${w.name || 'कारीगर'} जी, HUNAR BHARAT KA पोर्टल व्यवस्थापक द्वारा आपकी प्रोफाइल (${w.workerId}) के संबंध में संपर्क किया जा रहा है।`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-secondary btn-sm"
+                          title="WhatsApp Worker"
+                          style={{ padding: '4px 8px', fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                        >
+                          <WhatsAppSolidIcon size={14} color="#25D366" />
+                          <span className="hide-on-mobile">WhatsApp</span>
+                        </a>
+                      )}
+
                       {/* View Full Worker Details in Admin Modal */}
                       <button 
                         onClick={() => handleOpenWorkerDetail(w.id)} 
@@ -535,7 +551,19 @@ const AdminWorkers = () => {
               <span>Updated: {new Date(selectedWorker.updatedAt).toLocaleString()}</span>
             </div>
 
-            <div style={{ display: 'flex', gap: '10px', marginTop: '20px', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '20px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+              {(selectedWorker.whatsappNumber || selectedWorker.phone) && (
+                <a
+                  href={`https://wa.me/91${(selectedWorker.whatsappNumber || selectedWorker.phone).replace(/\D/g, '')}?text=${encodeURIComponent(`नमस्ते ${selectedWorker.name || 'कारीगर'} जी, HUNAR BHARAT KA पोर्टल व्यवस्थापक द्वारा आपकी प्रोफाइल (${selectedWorker.workerId}) के संबंध में संपर्क किया जा रहा है।`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary btn-sm"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <WhatsAppSolidIcon size={16} color="#25D366" />
+                  <span>Contact on WhatsApp</span>
+                </a>
+              )}
               <button 
                 onClick={() => handleToggleVerification(selectedWorker.id, selectedWorker.isVerified)}
                 className={`btn btn-sm ${selectedWorker.isVerified ? 'btn-secondary' : 'btn-primary'}`}

@@ -15,6 +15,7 @@ import {
   ShieldCheck, 
   Building 
 } from 'lucide-react';
+import WhatsAppSolidIcon from './WhatsAppIcon';
 
 const JobDetails = () => {
   const { id } = useParams();
@@ -254,14 +255,29 @@ const JobDetails = () => {
             <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '8px', color: 'var(--text-primary)' }}>
               नियोक्ता / संपर्क व्यक्ति (Employer / Contact)
             </h3>
-            <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
-              <Building size={14} style={{ verticalAlign: 'middle', marginRight: '6px' }} />
-              <strong>{job.employerName}</strong>
+            <div style={{ fontSize: '14px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+              <div>
+                <Building size={14} style={{ verticalAlign: 'middle', marginRight: '6px' }} />
+                <strong>{job.employerName}</strong>
+              </div>
               {job.employerContact && (
-                <span style={{ marginLeft: '12px' }}>
-                  <Phone size={14} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
-                  +91 {job.employerContact}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span>
+                    <Phone size={14} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+                    +91 {job.employerContact}
+                  </span>
+                  <a
+                    href={`https://wa.me/91${job.employerContact.replace(/\D/g, '')}?text=${encodeURIComponent(`नमस्ते, मैंने HUNAR BHARAT KA पोर्टल पर आपकी जॉब पोस्ट (${job.titleHi}) देखी है।`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-secondary btn-sm"
+                    style={{ padding: '3px 8px', fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                    title="Contact Employer on WhatsApp"
+                  >
+                    <WhatsAppSolidIcon size={14} color="#25D366" />
+                    <span>WhatsApp</span>
+                  </a>
+                </div>
               )}
             </div>
           </div>

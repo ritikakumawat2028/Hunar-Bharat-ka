@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { ShieldCheck, Share2, MapPin, Phone, MessageSquare, Star, Award, AlertCircle } from 'lucide-react';
+import WhatsAppSolidIcon from './WhatsAppIcon';
 
 const PublicWorkerProfile = () => {
   const { identifier } = useParams();
@@ -135,9 +136,10 @@ const PublicWorkerProfile = () => {
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-primary"
-              style={{ padding: '12px' }}
+              style={{ padding: '12px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
             >
-              <MessageSquare size={16} /> व्हाट्सएप पर संपर्क करें
+              <WhatsAppSolidIcon size={18} color="#25D366" />
+              <span>व्हाट्सएप पर संपर्क करें</span>
             </a>
           ) : (
             <button disabled className="btn btn-secondary" style={{ padding: '12px' }}>

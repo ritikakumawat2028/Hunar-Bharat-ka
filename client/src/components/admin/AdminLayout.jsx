@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import {
@@ -11,35 +11,65 @@ import {
   BarChart2,
   Settings,
   LogOut,
-  ExternalLink
+  ExternalLink,
+  Menu,
+  X
 } from 'lucide-react';
 
 const AdminLayout = ({ children }) => {
   const { logout, user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
+  const closeSidebar = () => {
+    setMobileSidebarOpen(false);
+  };
+
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#F9FAFB', fontFamily: 'var(--font-en)' }}>
+    <div className="admin-layout" style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#F9FAFB', fontFamily: 'var(--font-en)' }}>
+      {/* Mobile Backdrop */}
+      {mobileSidebarOpen && (
+        <div
+          onClick={closeSidebar}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            zIndex: 998
+          }}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside style={{ width: '260px', backgroundColor: '#FFFFFF', borderRight: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '24px 20px', borderBottom: '1px solid var(--border-light)' }}>
-          <div style={{ fontSize: '16px', fontWeight: '800', letterSpacing: '-0.3px', color: '#111827' }}>
-            HBK ADMIN
+      <aside className={`admin-sidebar ${mobileSidebarOpen ? 'admin-sidebar-open' : ''}`} style={{ width: '260px', backgroundColor: '#FFFFFF', borderRight: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '20px', borderBottom: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div style={{ fontSize: '16px', fontWeight: '800', letterSpacing: '-0.3px', color: '#111827' }}>
+              HBK ADMIN
+            </div>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+              Hunar Bharat Ka Management
+            </div>
           </div>
-          <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-            Hunar Bharat Ka Management
-          </div>
+          <button
+            onClick={closeSidebar}
+            className="admin-mobile-close-btn"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <nav style={{ padding: '16px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <NavLink
             to="/admin"
             end
+            onClick={closeSidebar}
             className={({ isActive }) => `btn btn-sm ${isActive ? 'btn-primary' : 'btn-secondary'}`}
             style={{ justifyContent: 'flex-start', border: 'none' }}
           >
@@ -48,6 +78,7 @@ const AdminLayout = ({ children }) => {
 
           <NavLink
             to="/admin/workers"
+            onClick={closeSidebar}
             className={({ isActive }) => `btn btn-sm ${isActive ? 'btn-primary' : 'btn-secondary'}`}
             style={{ justifyContent: 'flex-start', border: 'none' }}
           >
@@ -56,6 +87,7 @@ const AdminLayout = ({ children }) => {
 
           <NavLink
             to="/admin/jobs"
+            onClick={closeSidebar}
             className={({ isActive }) => `btn btn-sm ${isActive ? 'btn-primary' : 'btn-secondary'}`}
             style={{ justifyContent: 'flex-start', border: 'none' }}
           >
@@ -64,6 +96,7 @@ const AdminLayout = ({ children }) => {
 
           <NavLink
             to="/admin/applications"
+            onClick={closeSidebar}
             className={({ isActive }) => `btn btn-sm ${isActive ? 'btn-primary' : 'btn-secondary'}`}
             style={{ justifyContent: 'flex-start', border: 'none' }}
           >
@@ -72,6 +105,7 @@ const AdminLayout = ({ children }) => {
 
           <NavLink
             to="/admin/reviews"
+            onClick={closeSidebar}
             className={({ isActive }) => `btn btn-sm ${isActive ? 'btn-primary' : 'btn-secondary'}`}
             style={{ justifyContent: 'flex-start', border: 'none' }}
           >
@@ -80,6 +114,7 @@ const AdminLayout = ({ children }) => {
 
           <NavLink
             to="/admin/notifications"
+            onClick={closeSidebar}
             className={({ isActive }) => `btn btn-sm ${isActive ? 'btn-primary' : 'btn-secondary'}`}
             style={{ justifyContent: 'flex-start', border: 'none' }}
           >
@@ -88,6 +123,7 @@ const AdminLayout = ({ children }) => {
 
           <NavLink
             to="/admin/reports"
+            onClick={closeSidebar}
             className={({ isActive }) => `btn btn-sm ${isActive ? 'btn-primary' : 'btn-secondary'}`}
             style={{ justifyContent: 'flex-start', border: 'none' }}
           >
@@ -96,6 +132,7 @@ const AdminLayout = ({ children }) => {
 
           <NavLink
             to="/admin/settings"
+            onClick={closeSidebar}
             className={({ isActive }) => `btn btn-sm ${isActive ? 'btn-primary' : 'btn-secondary'}`}
             style={{ justifyContent: 'flex-start', border: 'none' }}
           >
@@ -124,16 +161,26 @@ const AdminLayout = ({ children }) => {
 
       {/* Main Admin Content */}
       <main style={{ flex: 1, overflowY: 'auto' }}>
-        <header style={{ height: '64px', backgroundColor: '#FFFFFF', borderBottom: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 32px' }}>
-          <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-secondary)' }}>
-            Administration Portal (English Interface)
+        <header className="admin-header" style={{ height: '64px', backgroundColor: '#FFFFFF', borderBottom: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button
+              onClick={() => setMobileSidebarOpen(true)}
+              className="admin-mobile-menu-trigger"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: '#111827' }}
+              aria-label="Open Admin Menu"
+            >
+              <Menu size={22} />
+            </button>
+            <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-secondary)' }}>
+              Administration Portal (English Interface)
+            </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span className="badge badge-verified">Authorized Admin</span>
           </div>
         </header>
 
-        <div style={{ padding: '32px' }}>
+        <div className="admin-content-inner" style={{ padding: '32px' }}>
           {children}
         </div>
       </main>

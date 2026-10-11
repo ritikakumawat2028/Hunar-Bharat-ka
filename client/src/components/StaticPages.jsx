@@ -1,5 +1,6 @@
 import React from 'react';
 import { Shield, Lock, Eye, CheckCircle } from 'lucide-react';
+import WhatsAppSolidIcon from './WhatsAppIcon';
 
 export const PrivacyPolicy = () => {
   return (
@@ -92,11 +93,27 @@ export const ContactHelp = () => {
           यदि आपको पंजीकरण, नौकरी खोजने या खाते से संबंधित कोई सहायता चाहिए, तो संपर्क करें:
         </p>
 
-        <div className="grid-2" style={{ marginBottom: '24px' }}>
+        <div className="grid-3" style={{ marginBottom: '24px' }}>
           <div style={{ backgroundColor: '#FAFAFA', padding: '16px', borderRadius: '6px', border: '1px solid var(--border-light)' }}>
             <h4 style={{ fontSize: '15px', marginBottom: '6px' }}>हेल्पलाइन मोबाइल नंबर</h4>
             <p style={{ fontSize: '16px', fontWeight: 'bold' }}>+91 98765 43210</p>
             <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>प्रातः 9:00 से सायं 6:00 बजे तक</div>
+          </div>
+
+          <div style={{ backgroundColor: '#FAFAFA', padding: '16px', borderRadius: '6px', border: '1px solid var(--border-light)' }}>
+            <h4 style={{ fontSize: '15px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <WhatsAppSolidIcon size={16} color="#25D366" />
+              <span>व्हाट्सएप हेल्पलाइन</span>
+            </h4>
+            <a 
+              href={`https://wa.me/919876543210?text=${encodeURIComponent('नमस्ते HUNAR BHARAT KA सहायता केंद्र, मुझे पोर्टल के संबंध में सहायता चाहिए।')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ fontSize: '15px', fontWeight: 'bold', textDecoration: 'underline', color: 'var(--text-primary)' }}
+            >
+              +91 98765 43210
+            </a>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>क्लिक कर सीधा चैट करें</div>
           </div>
 
           <div style={{ backgroundColor: '#FAFAFA', padding: '16px', borderRadius: '6px', border: '1px solid var(--border-light)' }}>

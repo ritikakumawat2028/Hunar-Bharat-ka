@@ -14,6 +14,7 @@ import {
   CheckCircle,
   AlertCircle
 } from 'lucide-react';
+import WhatsAppSolidIcon from '../WhatsAppIcon';
 
 const AdminDashboard = () => {
   const [metrics, setMetrics] = useState(null);
@@ -175,7 +176,7 @@ const AdminDashboard = () => {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {metrics?.recentApplications?.map(app => (
-                <div key={app.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '10px' }}>
+                <div key={app.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
                   <div>
                     <div style={{ fontWeight: '600', fontSize: '14px' }}>
                       {app.user?.name} → {app.job?.titleHi}
@@ -184,11 +185,21 @@ const AdminDashboard = () => {
                       Applicant ID: {app.user?.workerId} • Applied: {new Date(app.appliedAt).toLocaleDateString()}
                     </div>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {(app.user?.whatsappNumber || app.user?.phone) && (
+                      <a
+                        href={`https://wa.me/91${(app.user?.whatsappNumber || app.user?.phone).replace(/\D/g, '')}?text=${encodeURIComponent(`नमस्ते ${app.user?.name || 'कारीगर'} जी, HUNAR BHARAT KA पोर्टल पर आपके आवेदन (${app.job?.titleHi || 'नौकरी'}) के संबंध में व्यवस्थापक द्वारा संपर्क किया जा रहा है।`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-secondary btn-sm"
+                        style={{ padding: '3px 8px', fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                        title="Contact Applicant on WhatsApp"
+                      >
+                        <WhatsAppSolidIcon size={13} color="#25D366" />
+                        <span>WhatsApp</span>
+                      </a>
+                    )}
                     <span className="badge">{app.status}</span>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                      {app.job?.city}
-                    </div>
                   </div>
                 </div>
               ))}

@@ -15,6 +15,7 @@ import {
   AlertCircle 
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import WhatsAppSolidIcon from '../WhatsAppIcon';
 
 const AdminApplications = () => {
   const [applications, setApplications] = useState([]);
@@ -225,7 +226,22 @@ const AdminApplications = () => {
                   </td>
 
                   <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                    <div style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}>
+                    <div style={{ display: 'inline-flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                      {/* WhatsApp Direct Contact Button */}
+                      {(app.user?.whatsappNumber || app.user?.phone) && (
+                        <a
+                          href={`https://wa.me/91${(app.user?.whatsappNumber || app.user?.phone).replace(/\D/g, '')}?text=${encodeURIComponent(`नमस्ते ${app.user?.name || 'कारीगर'} जी, HUNAR BHARAT KA पोर्टल पर आपके आवेदन (${app.job?.titleHi || 'नौकरी'}) के संबंध में व्यवस्थापक द्वारा संपर्क किया जा रहा है।`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-secondary btn-sm"
+                          title="Contact Applicant on WhatsApp"
+                          style={{ padding: '4px 8px', fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                        >
+                          <WhatsAppSolidIcon size={14} color="#25D366" />
+                          <span className="hide-on-mobile">WhatsApp</span>
+                        </a>
+                      )}
+
                       {/* View Application Profile Snapshot */}
                       <button 
                         onClick={() => handleViewSnapshot(app)} 
@@ -314,13 +330,36 @@ const AdminApplications = () => {
                       <span style={{ fontSize: '16px', fontWeight: '700' }}>{snap?.name || selectedApp.user?.name}</span>
                       <span className="badge badge-verified">{snap?.workerId || selectedApp.user?.workerId}</span>
                     </div>
-                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px', marginBottom: '14px' }}>
                       <div><strong>मोबाइल:</strong> +91 {snap?.phone || selectedApp.user?.phone}</div>
                       <div><strong>व्हाट्सएप:</strong> +91 {snap?.whatsappNumber || snap?.phone || selectedApp.user?.phone}</div>
                       <div><strong>कौशल:</strong> {snap?.skills || selectedApp.user?.skills || 'N/A'}</div>
                       <div><strong>अनुभव:</strong> {snap?.experience || selectedApp.user?.experience || 'N/A'}</div>
                       <div><strong>स्थान:</strong> {snap?.villageOrTown || ''}, {snap?.district || selectedApp.user?.district}</div>
                       <div><strong>श्रेणी:</strong> {snap?.category || selectedApp.user?.category?.nameHi || 'सामान्य'}</div>
+                    </div>
+
+                    {/* Quick WhatsApp Contact CTA */}
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                      <a
+                        href={`https://wa.me/91${(snap?.whatsappNumber || snap?.phone || selectedApp.user?.whatsappNumber || selectedApp.user?.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(`नमस्ते ${snap?.name || selectedApp.user?.name || 'कारीगर'} जी, HUNAR BHARAT KA पोर्टल पर आपके आवेदन (${selectedApp.job?.titleHi || 'नौकरी'}) के संबंध में व्यवस्थापक द्वारा संपर्क किया जा रहा है।`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-secondary btn-sm"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
+                      >
+                        <WhatsAppSolidIcon size={16} color="#25D366" />
+                        <span>Contact Applicant on WhatsApp</span>
+                      </a>
+
+                      <a
+                        href={`tel:+91${(snap?.phone || selectedApp.user?.phone || '').replace(/\D/g, '')}`}
+                        className="btn btn-secondary btn-sm"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
+                      >
+                        <Phone size={14} />
+                        <span>Direct Call</span>
+                      </a>
                     </div>
                   </div>
 

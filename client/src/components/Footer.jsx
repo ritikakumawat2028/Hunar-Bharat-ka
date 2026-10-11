@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin } from 'lucide-react';
+import WhatsAppSolidIcon from './WhatsAppIcon';
 
 const Footer = () => {
   return (
@@ -41,6 +42,17 @@ const Footer = () => {
             </p>
             <p style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
               <Phone size={16} /> +91 98765 43210
+            </p>
+            <p style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <WhatsAppSolidIcon size={16} color="#25D366" /> 
+              <a 
+                href={`https://wa.me/919876543210?text=${encodeURIComponent('नमस्ते HUNAR BHARAT KA सहायता केंद्र, मुझे पोर्टल के संबंध में जानकारी चाहिए।')}`} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ color: 'inherit', textDecoration: 'none' }}
+              >
+                +91 98765 43210 (व्हाट्सएप)
+              </a>
             </p>
             <p style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Mail size={16} /> help@hunarbharatka.in
