@@ -47,13 +47,14 @@ app.get('/api/health', (req, res) => {
 const clientBuildPath = path.join(__dirname, '../client/dist');
 app.use(express.static(clientBuildPath));
 
-app.get('*', (req, res, next) => {
-  if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+// Express 5 compatible SPA fallback
+app.use((req, res, next) => {
+  if (req.method !== 'GET' || req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
     return next();
   }
   res.sendFile(path.join(clientBuildPath, 'index.html'), (err) => {
     if (err) {
-      // If client not built yet, fallback to status
+      // If client not built yet, fallback gracefully
       res.status(200).send('HUNAR BHARAT KA API is running. Build frontend with: npm run build in client directory.');
     }
   });
