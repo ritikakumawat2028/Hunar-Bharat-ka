@@ -462,16 +462,25 @@ router.post('/jobs', async (req, res) => {
       include: { category: true }
     });
 
-    // If published, trigger WhatsApp Job Notifications
+    // If published, trigger WhatsApp Job Notifications to ALL registered workers
     let notificationResult = null;
     if (normalizedStatus === 'PUBLISHED') {
-      const jobUrl = `http://localhost:5173/jobs/${job.id}`;
-      notificationResult = await sendWhatsAppJobAlert({
-        jobId: job.id,
-        jobTitle: job.titleHi,
-        location: `${job.city}, ${job.district}`,
-        skills: job.requiredSkills,
-        jobUrl
+      const frontendUrl = process.env.FRONTEND_URL || 'https://hunarbharatka.vercel.app';
+      const jobUrl = `${frontendUrl}/jobs/${job.id}`;
+      // Fire-and-forget: don't block the response
+      setImmediate(() => {
+        sendWhatsAppJobAlert({
+          jobId: job.id,
+          jobTitleHi: job.titleHi,
+          jobTitleEn: job.titleEn,
+          location: `${job.city}, ${job.district}`,
+          skills: job.requiredSkills,
+          payment: job.payment,
+          jobUrl
+        }).then(result => {
+          notificationResult = result;
+          console.log(`[Job Alert] Dispatched to ${result.dispatchedCount}/${result.totalWorkers} workers for job: ${job.titleHi}`);
+        }).catch(err => console.error('[Job Alert Error]:', err.message));
       });
     }
 
@@ -543,16 +552,23 @@ router.put('/jobs/:id', async (req, res) => {
       include: { category: true }
     });
 
-    // If transitioned to PUBLISHED from non-published
+    // If transitioned to PUBLISHED from non-published, trigger WhatsApp alerts
     let notificationResult = null;
     if (updated.status === 'PUBLISHED' && existing.status !== 'PUBLISHED') {
-      const jobUrl = `http://localhost:5173/jobs/${updated.id}`;
-      notificationResult = await sendWhatsAppJobAlert({
-        jobId: updated.id,
-        jobTitle: updated.titleHi,
-        location: `${updated.city}, ${updated.district}`,
-        skills: updated.requiredSkills,
-        jobUrl
+      const frontendUrl = process.env.FRONTEND_URL || 'https://hunarbharatka.vercel.app';
+      const jobUrl = `${frontendUrl}/jobs/${updated.id}`;
+      setImmediate(() => {
+        sendWhatsAppJobAlert({
+          jobId: updated.id,
+          jobTitleHi: updated.titleHi,
+          jobTitleEn: updated.titleEn,
+          location: `${updated.city}, ${updated.district}`,
+          skills: updated.requiredSkills,
+          payment: updated.payment,
+          jobUrl
+        }).then(result => {
+          console.log(`[Job Alert] Dispatched to ${result.dispatchedCount}/${result.totalWorkers} workers for job: ${updated.titleHi}`);
+        }).catch(err => console.error('[Job Alert Error]:', err.message));
       });
     }
 
@@ -596,13 +612,20 @@ router.put('/jobs/:id/status', async (req, res) => {
 
     let notificationResult = null;
     if (normalizedStatus === 'PUBLISHED' && existing.status !== 'PUBLISHED') {
-      const jobUrl = `http://localhost:5173/jobs/${updated.id}`;
-      notificationResult = await sendWhatsAppJobAlert({
-        jobId: updated.id,
-        jobTitle: updated.titleHi,
-        location: `${updated.city}, ${updated.district}`,
-        skills: updated.requiredSkills,
-        jobUrl
+      const frontendUrl = process.env.FRONTEND_URL || 'https://hunarbharatka.vercel.app';
+      const jobUrl = `${frontendUrl}/jobs/${updated.id}`;
+      setImmediate(() => {
+        sendWhatsAppJobAlert({
+          jobId: updated.id,
+          jobTitleHi: updated.titleHi,
+          jobTitleEn: updated.titleEn,
+          location: `${updated.city}, ${updated.district}`,
+          skills: updated.requiredSkills,
+          payment: updated.payment,
+          jobUrl
+        }).then(result => {
+          console.log(`[Job Alert] Dispatched to ${result.dispatchedCount}/${result.totalWorkers} workers for job: ${updated.titleHi}`);
+        }).catch(err => console.error('[Job Alert Error]:', err.message));
       });
     }
 

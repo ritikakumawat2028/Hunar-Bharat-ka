@@ -3,16 +3,13 @@ const prisma = new PrismaClient();
 
 /**
  * Official WhatsApp Business Platform Service
- * 
- * Invariants:
- * 1. Targeted skill / category and location eligibility matching.
- * 2. Strict opt-in check (whatsappOptIn: true).
- * 3. Official WhatsApp Business Platform (Meta Cloud API / Graph API v19.0).
- * 4. Transparent status:
- *    - 'SENT': When Meta Cloud API returns 200 with message ID.
- *    - 'FAILED': When API fails or invalid phone.
- *    - 'SANDBOX_MOCK': When Meta credentials are not configured in .env. Never simulated as real 'SENT'.
- * 5. Safe retry handler to prevent duplicate dispatches.
+ *
+ * Behavior:
+ * 1. Sends job alert to ALL registered workers (verified or not) who have a phone number.
+ * 2. Skips duplicate notifications (same job + same worker already notified).
+ * 3. Uses Meta Cloud API (Graph API v19.0) when credentials are configured.
+ * 4. Falls back to SANDBOX_MOCK mode (console log) when credentials are missing.
+ * 5. Message is bilingual: Hindi + English.
  */
 
 function getWhatsAppConfig() {
@@ -31,43 +28,65 @@ function getWhatsAppConfig() {
 }
 
 /**
- * Send WhatsApp job alert to eligible workers.
- * Queued asynchronously so job creation is never blocked.
+ * Build the bilingual (Hindi + English) job alert message.
  */
-async function sendWhatsAppJobAlert({ jobId, jobTitle, location, skills, categoryId, jobUrl }) {
+function buildJobMessage({ workerName, jobTitleHi, jobTitleEn, location, skills, payment, jobUrl }) {
+  const name = workerName || 'साथी / Friend';
+  const skillsText = skills ? `${skills}` : 'सामान्य / General';
+  const payText = payment ? `\n💰 वेतन / Pay: ${payment}` : '';
+
+  return (
+    `🔔 *नई नौकरी उपलब्ध! / New Job Available!*\n\n` +
+    `नमस्ते ${name},\n` +
+    `Hello ${name},\n\n` +
+    `📌 *${jobTitleHi}*\n` +
+    `📌 *${jobTitleEn}*\n\n` +
+    `📍 स्थान / Location: ${location}\n` +
+    `🔧 कौशल / Skills: ${skillsText}${payText}\n\n` +
+    `👉 विवरण देखें / View Details:\n${jobUrl}\n\n` +
+    `— *HUNAR BHARAT KA (हुनर भारत का)*`
+  );
+}
+
+/**
+ * Send WhatsApp job alert to ALL registered workers who have a phone number.
+ * Queued asynchronously so job creation is never blocked.
+ *
+ * @param {object} params
+ * @param {string} params.jobId
+ * @param {string} params.jobTitleHi
+ * @param {string} params.jobTitleEn
+ * @param {string} params.location
+ * @param {string} [params.skills]
+ * @param {string} [params.payment]
+ * @param {string} params.jobUrl
+ */
+async function sendWhatsAppJobAlert({ jobId, jobTitleHi, jobTitleEn, location, skills, payment, jobUrl }) {
   const config = getWhatsAppConfig();
   const token = process.env.WHATSAPP_API_TOKEN;
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
-  // 1. Identify workers eligible for the notification:
-  // - Role must be WORKER
-  // - Status must be ACTIVE (not suspended)
-  // - Must have explicit WhatsApp opt-in (whatsappOptIn: true)
-  // - Must have a valid phone or whatsappNumber
-  const whereFilter = {
-    role: 'WORKER',
-    status: 'ACTIVE',
-    whatsappOptIn: true,
-    OR: [
-      { whatsappNumber: { not: '' } },
-      { phone: { not: '' } }
-    ]
-  };
-
-  // If trade category specified, match workers in category or with matching skills
-  if (categoryId) {
-    whereFilter.categoryId = categoryId;
-  }
-
-  const eligibleWorkers = await prisma.user.findMany({
-    where: whereFilter,
-    include: { category: true }
+  // Fetch ALL workers who have a phone number (verified or not, opt-in or not)
+  const allWorkers = await prisma.user.findMany({
+    where: {
+      role: 'WORKER',
+      OR: [
+        { whatsappNumber: { not: null } },
+        { phone: { not: null } }
+      ]
+    },
+    select: {
+      id: true,
+      name: true,
+      phone: true,
+      whatsappNumber: true
+    }
   });
 
   const results = [];
 
-  for (const worker of eligibleWorkers) {
-    // Check if notification for this job and worker already exists to avoid duplicate message spam
+  for (const worker of allWorkers) {
+    // Skip if notification for this job + worker already sent (deduplication)
     const existingNotification = await prisma.notification.findFirst({
       where: {
         userId: worker.id,
@@ -77,24 +96,36 @@ async function sendWhatsAppJobAlert({ jobId, jobTitle, location, skills, categor
     });
 
     if (existingNotification) {
-      continue; // Skip duplicate notification
+      continue;
     }
 
+    // Prefer whatsappNumber, fallback to phone
     const rawNumber = (worker.whatsappNumber || worker.phone || '').trim().replace(/\D/g, '');
+    if (!rawNumber || rawNumber.length < 7) {
+      continue; // No valid number at all — skip
+    }
+
     const cleanRecipientPhone = rawNumber.slice(-10);
     const formattedPhone = `91${cleanRecipientPhone}`;
 
-    // Standard Approved Hindi Message Template Body
-    const hindiMessage = `नमस्ते ${worker.name || 'कारीगर साथी'}, आपके लिए एक नई नौकरी उपलब्ध है।\n\nनौकरी: ${jobTitle}\nस्थान: ${location}\nआवश्यक कौशल: ${skills || 'सामान्य'}\n\nविवरण देखें और आवेदन करें: ${jobUrl}\n\nHUNAR BHARAT KA`;
+    const message = buildJobMessage({
+      workerName: worker.name,
+      jobTitleHi,
+      jobTitleEn,
+      location,
+      skills,
+      payment,
+      jobUrl
+    });
 
     let status = 'SANDBOX_MOCK';
-    let providerMessageId = `sandbox_wa_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    let providerMessageId = `sandbox_wa_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
     let failureReason = null;
 
     if (config.isConfigured) {
       try {
         const metaApiUrl = `https://graph.facebook.com/v19.0/${phoneNumberId}/messages`;
-        
+
         const response = await fetch(metaApiUrl, {
           method: 'POST',
           headers: {
@@ -108,7 +139,7 @@ async function sendWhatsAppJobAlert({ jobId, jobTitle, location, skills, categor
             type: 'text',
             text: {
               preview_url: true,
-              body: hindiMessage
+              body: message
             }
           })
         });
@@ -121,21 +152,22 @@ async function sendWhatsAppJobAlert({ jobId, jobTitle, location, skills, categor
         } else {
           status = 'FAILED';
           failureReason = data.error?.message || 'Meta Cloud API error';
+          console.error(`[WhatsApp FAILED for +${formattedPhone}]:`, failureReason);
         }
       } catch (err) {
         status = 'FAILED';
         failureReason = err.message;
-        console.error(`[WhatsApp API Error for ${formattedPhone}]:`, failureReason);
+        console.error(`[WhatsApp API Error for +${formattedPhone}]:`, failureReason);
       }
     } else {
-      // CLEAR TRANSPARENT STATUS: NOT LIVE SENT, CLEARLY LABELED AS SANDBOX_MOCK
+      // Sandbox / dev mode — log clearly, never pretend it was sent
       status = 'SANDBOX_MOCK';
-      failureReason = 'Sandbox Mode: Live Meta WhatsApp API credentials (WHATSAPP_API_TOKEN, WHATSAPP_PHONE_NUMBER_ID) not configured in .env. Message recorded for testing.';
-      console.log(`\n--- [WHATSAPP SANDBOX DISPATCH LOG] ---`);
-      console.log(`To: +${formattedPhone} (${worker.name})`);
-      console.log(`Template: job_alert_hindi_v1`);
-      console.log(`Message:\n${hindiMessage}`);
-      console.log(`----------------------------------------\n`);
+      failureReason =
+        'Sandbox Mode: Live Meta WhatsApp API credentials not configured in .env. Message recorded for testing.';
+      console.log(`\n--- [WHATSAPP SANDBOX DISPATCH] ---`);
+      console.log(`To: +${formattedPhone} (${worker.name || 'Unknown'})`);
+      console.log(`Message:\n${message}`);
+      console.log(`------------------------------------\n`);
     }
 
     const log = await prisma.notification.create({
@@ -144,8 +176,8 @@ async function sendWhatsAppJobAlert({ jobId, jobTitle, location, skills, categor
         jobId: jobId,
         type: 'WHATSAPP',
         recipientPhone: cleanRecipientPhone,
-        templateName: 'job_alert_hindi_v1',
-        message: hindiMessage,
+        templateName: 'job_alert_bilingual_v2',
+        message: message,
         status: status,
         providerMessageId: providerMessageId,
         failureReason: failureReason,
@@ -157,8 +189,12 @@ async function sendWhatsAppJobAlert({ jobId, jobTitle, location, skills, categor
     results.push(log);
   }
 
+  console.log(
+    `[WhatsApp Job Alert] Job: "${jobTitleHi}" | Total Workers: ${allWorkers.length} | Dispatched: ${results.length} | Mode: ${config.status}`
+  );
+
   return {
-    totalEligible: eligibleWorkers.length,
+    totalWorkers: allWorkers.length,
     dispatchedCount: results.length,
     configStatus: config.status,
     logs: results
@@ -166,7 +202,7 @@ async function sendWhatsAppJobAlert({ jobId, jobTitle, location, skills, categor
 }
 
 /**
- * Retry failed notification safely
+ * Retry a failed or sandbox notification safely.
  */
 async function retryWhatsAppNotification(notificationId) {
   const notif = await prisma.notification.findUnique({
@@ -227,6 +263,8 @@ async function retryWhatsAppNotification(notificationId) {
   } else {
     status = 'SANDBOX_MOCK';
     failureReason = 'Sandbox Mode: Credentials missing. Retried in test mode.';
+    console.log(`[WHATSAPP RETRY SANDBOX] To: +${formattedPhone}`);
+    console.log(`Message:\n${notif.message}\n`);
   }
 
   const updated = await prisma.notification.update({
