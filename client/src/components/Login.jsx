@@ -26,7 +26,7 @@ const Login = () => {
     setError('');
     setOtpSending(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/send-otp', { phone });
+      const res = await axios.post('/api/auth/send-otp', { phone });
       setOtpSent(true);
       const code = res.data?.otp || '';
       setOtp(code);

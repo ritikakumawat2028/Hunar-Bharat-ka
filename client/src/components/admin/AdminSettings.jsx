@@ -7,7 +7,7 @@ const AdminSettings = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/admin/settings')
+    axios.get('/api/admin/settings')
       .then(res => setSettings(res.data))
       .catch(err => console.error(err))
       .finally(() => setLoading(false));

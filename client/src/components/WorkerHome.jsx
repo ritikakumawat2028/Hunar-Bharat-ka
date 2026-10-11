@@ -9,7 +9,7 @@ const WorkerHome = () => {
 
   useEffect(() => {
     // Fetch jobs from backend
-    axios.get('http://localhost:5000/api/jobs')
+    axios.get('/api/jobs')
       .then(res => setJobs(res.data))
       .catch(err => console.error("Error fetching jobs", err));
   }, []);

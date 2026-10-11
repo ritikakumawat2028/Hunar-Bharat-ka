@@ -29,7 +29,7 @@ const JobDetails = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/jobs/${id}`)
+    axios.get(`/api/jobs/${id}`)
       .then(res => setJob(res.data))
       .catch(err => setError(err.response?.data?.error || 'यह नौकरी उपलब्ध नहीं है अथवा बंद कर दी गई है।'))
       .finally(() => setLoading(false));
@@ -50,7 +50,7 @@ const JobDetails = () => {
     setError('');
 
     try {
-      await axios.post(`http://localhost:5000/api/jobs/${id}/apply`);
+      await axios.post(`/api/jobs/${id}/apply`);
       setApplySuccess(true);
     } catch (err) {
       setError(err.response?.data?.error || 'आवेदन जमा करने में विफल।');

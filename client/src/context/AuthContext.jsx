@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }) => {
         payload.password = password;
       }
 
-      const res = await axios.post('http://localhost:5000/api/auth/login', payload);
+      const res = await axios.post('/api/auth/login', payload);
       const { token: receivedToken, user: receivedUser } = res.data;
       localStorage.setItem('token', receivedToken);
       localStorage.setItem('user', JSON.stringify(receivedUser));
@@ -81,7 +81,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (formData) => {
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/register', formData);
+      const res = await axios.post('/api/auth/register', formData);
       const { token: receivedToken, user: receivedUser } = res.data;
       localStorage.setItem('token', receivedToken);
       localStorage.setItem('user', JSON.stringify(receivedUser));

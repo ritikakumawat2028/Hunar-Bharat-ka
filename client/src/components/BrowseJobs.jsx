@@ -33,7 +33,7 @@ const BrowseJobs = () => {
       params.append('page', page);
       params.append('limit', 10);
 
-      const res = await axios.get(`http://localhost:5000/api/jobs?${params.toString()}`);
+      const res = await axios.get(`/api/jobs?${params.toString()}`);
       setJobs(res.data?.jobs || []);
       setPagination(res.data?.pagination || { page: 1, totalPages: 1, total: 0, limit: 10 });
     } catch (err) {
@@ -45,7 +45,7 @@ const BrowseJobs = () => {
   };
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/jobs/categories')
+    axios.get('/api/jobs/categories')
       .then(res => setCategories(res.data || []))
       .catch(err => console.error(err));
   }, []);
@@ -68,7 +68,7 @@ const BrowseJobs = () => {
     setEmploymentType('');
     setCategoryId('');
     setPage(1);
-    axios.get('http://localhost:5000/api/jobs?page=1&limit=10')
+    axios.get('/api/jobs?page=1&limit=10')
       .then(res => {
         setJobs(res.data?.jobs || []);
         setPagination(res.data?.pagination || { page: 1, totalPages: 1, total: 0, limit: 10 });

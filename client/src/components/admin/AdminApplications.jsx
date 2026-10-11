@@ -40,7 +40,7 @@ const AdminApplications = () => {
       const params = new URLSearchParams();
       if (statusFilter) params.append('status', statusFilter);
 
-      const res = await axios.get(`http://localhost:5000/api/admin/applications?${params.toString()}`);
+      const res = await axios.get(`/api/admin/applications?${params.toString()}`);
       setApplications(res.data || []);
     } catch (err) {
       console.error(err);
@@ -65,7 +65,7 @@ const AdminApplications = () => {
     if (!statusDialogApp || !selectedNewStatus) return;
 
     try {
-      await axios.put(`http://localhost:5000/api/admin/applications/${statusDialogApp.id}/status`, {
+      await axios.put(`/api/admin/applications/${statusDialogApp.id}/status`, {
         status: selectedNewStatus,
         adminNotes: adminNoteInput
       });

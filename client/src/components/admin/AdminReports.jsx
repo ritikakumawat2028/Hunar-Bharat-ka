@@ -18,7 +18,7 @@ const AdminReports = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/admin/reports/data')
+    axios.get('/api/admin/reports/data')
       .then(res => setData(res.data))
       .catch(err => console.error(err))
       .finally(() => setLoading(false));

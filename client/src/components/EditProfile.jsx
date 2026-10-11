@@ -34,8 +34,8 @@ const EditProfile = () => {
     const fetchData = async () => {
       try {
         const [catsRes, meRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/jobs/categories'),
-          axios.get('http://localhost:5000/api/users/me')
+          axios.get('/api/jobs/categories'),
+          axios.get('/api/users/me')
         ]);
         setCategories(catsRes.data || []);
         if (meRes.data) {
@@ -83,7 +83,7 @@ const EditProfile = () => {
     setMessage('');
 
     try {
-      await axios.put('http://localhost:5000/api/users/me', formData);
+      await axios.put('/api/users/me', formData);
       setMessage('प्रोफाइल सफलतापूर्वक अपडेट हो गई!');
       setTimeout(() => navigate('/my-profile'), 1200);
     } catch (err) {

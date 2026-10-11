@@ -8,7 +8,7 @@ const ReviewsPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/reviews')
+    axios.get('/api/reviews')
       .then(res => setReviews(res.data || []))
       .catch(err => console.error(err))
       .finally(() => setLoading(false));

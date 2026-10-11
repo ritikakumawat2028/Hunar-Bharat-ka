@@ -42,7 +42,7 @@ const Register = () => {
     if (user && user.role === 'WORKER') {
       navigate('/dashboard');
     }
-    axios.get('http://localhost:5000/api/jobs/categories')
+    axios.get('/api/jobs/categories')
       .then(res => setCategories(res.data || []))
       .catch(err => console.error(err));
   }, [user, navigate]);
@@ -68,7 +68,7 @@ const Register = () => {
     setIsAlreadyRegistered(false);
     setOtpSending(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/send-otp', {
+      const res = await axios.post('/api/auth/send-otp', {
         phone: formData.phone,
         purpose: 'register'
       });

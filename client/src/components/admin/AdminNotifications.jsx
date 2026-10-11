@@ -25,7 +25,7 @@ const AdminNotifications = () => {
   const fetchLogs = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/notifications');
+      const res = await axios.get('/api/admin/notifications');
       setData(res.data || { notifications: [], config: {} });
     } catch (err) {
       console.error(err);
@@ -44,7 +44,7 @@ const AdminNotifications = () => {
     setActionMessage('');
     setActionError('');
     try {
-      const res = await axios.post(`http://localhost:5000/api/admin/notifications/${notifId}/retry`);
+      const res = await axios.post(`/api/admin/notifications/${notifId}/retry`);
       setActionMessage('Notification re-queued and processed safely.');
       setTimeout(() => setActionMessage(''), 4000);
       fetchLogs();

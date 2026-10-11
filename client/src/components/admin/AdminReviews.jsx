@@ -9,7 +9,7 @@ const AdminReviews = () => {
   const fetchReviews = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/reviews');
+      const res = await axios.get('/api/admin/reviews');
       setReviews(res.data || []);
     } catch (err) {
       console.error(err);
@@ -24,7 +24,7 @@ const AdminReviews = () => {
 
   const handleToggleModeration = async (id, currentVal) => {
     try {
-      await axios.put(`http://localhost:5000/api/admin/reviews/${id}`, { isModerated: !currentVal });
+      await axios.put(`/api/admin/reviews/${id}`, { isModerated: !currentVal });
       fetchReviews();
     } catch (err) {
       alert('Failed to update review status');

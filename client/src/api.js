@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Automatically detect environment: In production, relative to domain or VITE_API_URL, in local dev http://localhost:5000
-const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000');
+// Automatically detect environment: In production, relative to domain or VITE_API_URL or Render backend; in local dev http://localhost:5000
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000' : 'https://hunar-bharat-ka.onrender.com');
 
 const api = axios.create({
   baseURL: API_BASE_URL

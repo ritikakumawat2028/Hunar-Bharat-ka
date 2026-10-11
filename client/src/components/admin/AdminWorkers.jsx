@@ -51,8 +51,8 @@ const AdminWorkers = () => {
       if (categoryFilter) params.append('categoryId', categoryFilter);
 
       const [workersRes, catsRes] = await Promise.all([
-        axios.get(`http://localhost:5000/api/admin/workers?${params.toString()}`),
-        axios.get('http://localhost:5000/api/jobs/categories')
+        axios.get(`/api/admin/workers?${params.toString()}`),
+        axios.get('/api/jobs/categories')
       ]);
       setWorkers(workersRes.data || []);
       setCategories(catsRes.data || []);
@@ -80,13 +80,13 @@ const AdminWorkers = () => {
     setAvailabilityFilter('');
     setExperienceFilter('');
     setCategoryFilter('');
-    axios.get('http://localhost:5000/api/admin/workers')
+    axios.get('/api/admin/workers')
       .then(res => setWorkers(res.data || []));
   };
 
   const handleOpenWorkerDetail = async (workerId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/admin/workers/${workerId}`);
+      const res = await axios.get(`/api/admin/workers/${workerId}`);
       setSelectedWorker(res.data);
       setShowDetailModal(true);
     } catch (err) {
@@ -99,7 +99,7 @@ const AdminWorkers = () => {
     if (note === null) return;
 
     try {
-      await axios.put(`http://localhost:5000/api/admin/workers/${workerId}/verification`, {
+      await axios.put(`/api/admin/workers/${workerId}/verification`, {
         isVerified: !currentVal,
         verificationNote: note
       });
@@ -125,7 +125,7 @@ const AdminWorkers = () => {
     }
 
     try {
-      await axios.put(`http://localhost:5000/api/admin/workers/${workerId}/status`, {
+      await axios.put(`/api/admin/workers/${workerId}/status`, {
         status: newStatus,
         suspendedReason: reason
       });

@@ -21,7 +21,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/admin/metrics')
+    axios.get('/api/admin/metrics')
       .then(res => setMetrics(res.data))
       .catch(err => console.error(err))
       .finally(() => setLoading(false));

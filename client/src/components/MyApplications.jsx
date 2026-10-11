@@ -10,7 +10,7 @@ const MyApplications = () => {
 
   const fetchApplications = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/jobs/my/applications');
+      const res = await axios.get('/api/jobs/my/applications');
       setApplications(res.data || []);
     } catch (err) {
       console.error(err);
@@ -26,7 +26,7 @@ const MyApplications = () => {
   const handleWithdraw = async (applicationId) => {
     if (!window.confirm('क्या आप सचमुच अपना आवेदन वापस लेना चाहते हैं?')) return;
     try {
-      await axios.post(`http://localhost:5000/api/jobs/my/applications/${applicationId}/withdraw`);
+      await axios.post(`/api/jobs/my/applications/${applicationId}/withdraw`);
       fetchApplications();
     } catch (err) {
       setActionError(err.response?.data?.error || 'आवेदन वापस लेने में त्रुटि हुई।');

@@ -71,8 +71,8 @@ const AdminJobs = () => {
       if (searchQuery) params.search = searchQuery;
 
       const [jobsRes, catsRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/admin/jobs', { params }),
-        axios.get('http://localhost:5000/api/jobs/categories')
+        axios.get('/api/admin/jobs', { params }),
+        axios.get('/api/jobs/categories')
       ]);
       setJobs(jobsRes.data || []);
       setCategories(catsRes.data || []);
@@ -166,14 +166,14 @@ const AdminJobs = () => {
 
     try {
       if (editingJob) {
-        const res = await axios.put(`http://localhost:5000/api/admin/jobs/${editingJob.id}`, formData);
+        const res = await axios.put(`/api/admin/jobs/${editingJob.id}`, formData);
         if (res.data?.notificationResult) {
           setActionMessage(`Job post updated & WhatsApp notification queued for ${res.data.notificationResult.totalEligible} eligible workers.`);
         } else {
           setActionMessage('Job post updated successfully.');
         }
       } else {
-        const res = await axios.post('http://localhost:5000/api/admin/jobs', formData);
+        const res = await axios.post('/api/admin/jobs', formData);
         if (res.data?.notificationResult) {
           setActionMessage(`Job published! WhatsApp notifications queued for ${res.data.notificationResult.totalEligible} eligible workers.`);
         } else {
@@ -192,7 +192,7 @@ const AdminJobs = () => {
   const handleStatusChange = async (jobId, targetStatus, label) => {
     if (!window.confirm(`Are you sure you want to mark this job as ${label}?`)) return;
     try {
-      const res = await axios.put(`http://localhost:5000/api/admin/jobs/${jobId}/status`, { status: targetStatus });
+      const res = await axios.put(`/api/admin/jobs/${jobId}/status`, { status: targetStatus });
       if (res.data?.notificationResult) {
         setActionMessage(`Job marked as ${label}! WhatsApp alert sent to ${res.data.notificationResult.totalEligible} eligible workers.`);
       } else {
@@ -208,7 +208,7 @@ const AdminJobs = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to permanently delete this job post? This action cannot be undone.')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/admin/jobs/${id}`);
+      await axios.delete(`/api/admin/jobs/${id}`);
       setActionMessage('Job permanently deleted.');
       setTimeout(() => setActionMessage(''), 3000);
       fetchJobs();

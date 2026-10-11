@@ -9,7 +9,7 @@ const Profile = () => {
   const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/users/me')
+    axios.get('/api/users/me')
       .then(res => setProfile(res.data))
       .catch(err => console.error(err))
       .finally(() => setLoading(false));

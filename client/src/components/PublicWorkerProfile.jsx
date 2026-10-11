@@ -23,7 +23,7 @@ const PublicWorkerProfile = () => {
 
   const fetchWorker = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/users/public/${identifier}`);
+      const res = await axios.get(`/api/users/public/${identifier}`);
       setWorker(res.data);
     } catch (err) {
       setError(err.response?.data?.error || 'कारीगर प्रोफाइल नहीं मिली।');
@@ -64,7 +64,7 @@ const PublicWorkerProfile = () => {
     setReviewMessage('');
 
     try {
-      await axios.post('http://localhost:5000/api/reviews', {
+      await axios.post('/api/reviews', {
         workerId: worker.workerId,
         rating: parseInt(rating),
         comment

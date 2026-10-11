@@ -16,9 +16,9 @@ const HomePage = () => {
     const fetchData = async () => {
       try {
         const [catsRes, jobsRes, workersRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/jobs/categories'),
-          axios.get('http://localhost:5000/api/jobs'),
-          axios.get('http://localhost:5000/api/users/public-directory')
+          axios.get('/api/jobs/categories'),
+          axios.get('/api/jobs'),
+          axios.get('/api/users/public-directory')
         ]);
         setCategories(catsRes.data || []);
         setRecentJobs(jobsRes.data?.jobs || []);

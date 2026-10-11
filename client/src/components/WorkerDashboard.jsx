@@ -16,9 +16,9 @@ const WorkerDashboard = () => {
     const fetchDashboardData = async () => {
       try {
         const [meRes, jobsRes, appsRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/users/me'),
-          axios.get('http://localhost:5000/api/jobs'),
-          axios.get('http://localhost:5000/api/jobs/my/applications')
+          axios.get('/api/users/me'),
+          axios.get('/api/jobs'),
+          axios.get('/api/jobs/my/applications')
         ]);
         setProfile(meRes.data);
         setJobs(jobsRes.data?.jobs || []);
@@ -51,7 +51,7 @@ const WorkerDashboard = () => {
 
   const handleAvailabilityToggle = async (newStatus) => {
     try {
-      const res = await axios.put('http://localhost:5000/api/users/me', { availability: newStatus });
+      const res = await axios.put('/api/users/me', { availability: newStatus });
       setProfile(prev => ({ ...prev, availability: res.data.availability }));
     } catch (err) {
       alert('उपलब्धता स्थिति बदलने में त्रुटि');
