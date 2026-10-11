@@ -142,10 +142,28 @@ const AdminJobs = () => {
     setShowPreviewModal(true);
   };
 
+  const todayStr = new Date().toISOString().slice(0, 10);
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setActionMessage('');
     setActionError('');
+
+    // Client-side past date check
+    if (formData.deadline) {
+      if (formData.deadline < todayStr) {
+        setActionError('Application Deadline cannot be in the past (भूतकाल में नहीं हो सकती). Please select today or a future date.');
+        return;
+      }
+    }
+
+    if (formData.jobDate && formData.jobDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      if (formData.jobDate < todayStr) {
+        setActionError('Work Date cannot be in the past. Please select today or a future date.');
+        return;
+      }
+    }
+
     try {
       if (editingJob) {
         const res = await axios.put(`http://localhost:5000/api/admin/jobs/${editingJob.id}`, formData);
@@ -647,15 +665,18 @@ const AdminJobs = () => {
               {/* Schedule, Duration & Deadline */}
               <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
                 <div className="form-group">
-                  <label className="form-label">Work Date / Start</label>
+                  <label className="form-label">Work Date / Start (कार्य तिथि)</label>
                   <input 
-                    type="text" 
+                    type="date" 
                     name="jobDate" 
+                    min={todayStr}
                     value={formData.jobDate} 
                     onChange={handleChange} 
                     className="form-input" 
-                    placeholder="उदा. तत्काल / 15-अक्टूबर" 
                   />
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    केवल आज या भविष्य की तिथि (No past dates)
+                  </div>
                 </div>
                 <div className="form-group">
                   <label className="form-label">Start Time / Duration</label>
@@ -669,14 +690,18 @@ const AdminJobs = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Application Deadline</label>
+                  <label className="form-label">Application Deadline (अंतिम तिथि)</label>
                   <input 
                     type="date" 
                     name="deadline" 
+                    min={todayStr}
                     value={formData.deadline} 
                     onChange={handleChange} 
                     className="form-input" 
                   />
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    केवल आज या भविष्य की तिथि (No past dates)
+                  </div>
                 </div>
               </div>
 

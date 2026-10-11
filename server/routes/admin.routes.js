@@ -395,10 +395,35 @@ router.post('/jobs', async (req, res) => {
       jobDate,
       startTime,
       duration,
-      deadline,
-      employmentType,
-      status = 'PUBLISHED'
-    } = req.body;
+    // Server-side Validation: Cannot create jobs with past job date or past deadline
+    const todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const today = new Date(todayStr);
+
+    if (deadline) {
+      const parsedDeadline = new Date(deadline);
+      if (isNaN(parsedDeadline.getTime())) {
+        return res.status(400).json({ error: 'अमान्य अंतिम तिथि प्रारूप (Invalid deadline date format).' });
+      }
+      const deadlineDay = new Date(parsedDeadline.toISOString().slice(0, 10));
+      if (deadlineDay < today) {
+        return res.status(400).json({ 
+          error: 'आवेदन की अंतिम तिथि (Deadline) भूतकाल (Past Date) में नहीं हो सकती है। कृपया आज या भविष्य की तिथि चुनें।' 
+        });
+      }
+    }
+
+    if (jobDate) {
+      // Check if jobDate is a standard YYYY-MM-DD date or parseable date
+      const parsedJobDate = new Date(jobDate);
+      if (!isNaN(parsedJobDate.getTime()) && jobDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const jobDay = new Date(parsedJobDate.toISOString().slice(0, 10));
+        if (jobDay < today) {
+          return res.status(400).json({ 
+            error: 'कार्य तिथि (Job Date) भूतकाल (Past Date) में नहीं हो सकती है। कृपया आज या भविष्य की तिथि चुनें।' 
+          });
+        }
+      }
+    }
 
     const normalizedStatus = status.toUpperCase();
 
@@ -471,6 +496,35 @@ router.put('/jobs/:id', async (req, res) => {
     }
 
     const updateData = { ...req.body };
+
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const today = new Date(todayStr);
+
+    if (updateData.deadline) {
+      const parsedDeadline = new Date(updateData.deadline);
+      if (isNaN(parsedDeadline.getTime())) {
+        return res.status(400).json({ error: 'अमान्य अंतिम तिथि प्रारूप (Invalid deadline date format).' });
+      }
+      const deadlineDay = new Date(parsedDeadline.toISOString().slice(0, 10));
+      if (deadlineDay < today) {
+        return res.status(400).json({ 
+          error: 'आवेदन की अंतिम तिथि (Deadline) भूतकाल (Past Date) में नहीं हो सकती है। कृपया आज या भविष्य की तिथि चुनें।' 
+        });
+      }
+    }
+
+    if (updateData.jobDate && updateData.jobDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const parsedJobDate = new Date(updateData.jobDate);
+      if (!isNaN(parsedJobDate.getTime())) {
+        const jobDay = new Date(parsedJobDate.toISOString().slice(0, 10));
+        if (jobDay < today) {
+          return res.status(400).json({ 
+            error: 'कार्य तिथि (Job Date) भूतकाल (Past Date) में नहीं हो सकती है। कृपया आज या भविष्य की तिथि चुनें।' 
+          });
+        }
+      }
+    }
+
     if (updateData.workersRequired) {
       updateData.workersRequired = parseInt(updateData.workersRequired) || 1;
     }
